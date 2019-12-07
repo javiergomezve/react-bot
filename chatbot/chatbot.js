@@ -2,10 +2,13 @@
 
 const dialogflow = require('dialogflow');
 
-const {googleProjectID, sessionID, sessionLanguageCode} = require('../config/dialogflow');
+const {googleProjectID, sessionID, sessionLanguageCode, clientEmail, privateKey} = require('../config/dialogflow');
 const structjson = require('./structjson');
 
-const sessionClient = new dialogflow.SessionsClient();
+const sessionClient = new dialogflow.SessionsClient({
+    projectID: googleProjectID,
+    credentials: { client_email: clientEmail, private_key: privateKey }
+});
 const sessionPath = sessionClient.sessionPath(googleProjectID, sessionID);
 
 module.exports = {
