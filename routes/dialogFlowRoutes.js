@@ -1,34 +1,11 @@
-const dialogflow = require('dialogflow');
 
-const {googleProjectID, sessionID, sessionLanguageCode} = require('../config/dialogflow');
-
-const sessionClient = new dialogflow.SessionsClient();
-const sessionPath = sessionClient.sessionPath(googleProjectID, sessionID);
+const chatbot = require('../chatbot/chatbot');
 
 module.exports = app => {
     app.post('/api/df_text_query', async (req, res) => {
-        const request = {
-            session: sessionPath,
-            queryInput: {
-                text: {
-                    text: req.body.text,
-                    languageCode: sessionLanguageCode
-                }
-            }
-        };
+        let responses = await chatbot.textQuery(req.body.text, req.body.parameters);
 
-        const responses = await sessionClient.detectIntent(request);
-        console.log('Detected intent');
-        const result = responses[0].queryResult;
-        console.log(`Query: ${result.queryText}`);
-        console.log(`Response: ${result.fulfillmentText}`);
-        if (result.intent) {
-            console.log(`Intent: ${result.intent.displayName}`);
-        } else {
-            console.log(`No intent matched.`);
-        }
-
-        res.send({ result });
+        res.send(responses[0].queryResult);
     });
     
     app.post('/api/df_event_query', (req, res) => {
