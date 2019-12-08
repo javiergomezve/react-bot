@@ -4,6 +4,7 @@ import Cookies from 'universal-cookie';
 import { v4 as uuid } from 'uuid';
 
 import Message from './Message';
+import Card from "./Card";
 
 const cookies = new Cookies();
 
@@ -64,7 +65,7 @@ class Chatbot extends Component {
                     ...this.state.messages,
                     says
                 ]
-            }); 
+            });
         }
     };
 
@@ -98,26 +99,77 @@ class Chatbot extends Component {
 
     renderMessages = messages => {
         if (messages) {
-            return messages.map((message, i) => {
-                return <Message key={i} speaks={message.speaks} text={message.msg.text.text} />
-            });
+            return messages.map((message, i) => this.renderOneMessage(message, i));
         }
 
         return null;
     };
 
+    renderOneMessage = (message, i) => {
+        if (message.msg && message.msg.text && message.msg.text.text) {
+            return <Message key={i} speaks={message.speaks} text={message.msg.text.text} />;
+        }
+
+        else if (message.msg && message.msg.payload && message.msg.payload.fields && message.msg.payload.fields.cards) {
+            return (
+                <div key={i}>
+                    <div className="card-panel grey lighten-5 z-depth-1">
+                        <div style={{ overflow: 'hidden' }}>
+                            <div className="col s2">
+                                <a className="btn-floating btn-large waves-effect waves-light red">
+                                    {message.speaks}
+                                </a>
+                            </div>
+                            <div style={{ overflow: 'hidden', overflowX: 'scroll', minHeight: 350, maxHeight: 350 }}>
+                                <div style={{
+                                    height: 300,
+                                    width: message.msg.payload.fields.cards.listValue.values.length * 300
+                                }}>
+                                    {this.renderCards(message.msg.payload.fields.cards.listValue.values)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        return null;
+    };
+
+    renderCards = cards => {
+        return cards.map((card, i) => <Card key={i} payload={card.structValue} />);
+    };
+
     render() {
         return (
-            <div style={{ height: 400, width: 400, float: 'right'}}>
-                <div id="chatbot" style={{ height: '100%', width: '100%', overflow: 'auto'}}>
-                    <h2>Chatbot</h2>
+            <div style={{ minHeight: 500, maxHeight: 500, width: 400, position: 'absolute', bottom: 0, right: 0, border: '1px solid lightgrey' }}>
+                <nav>
+                    <div className="nav-wrapper">
+                        <a className="brand-logo">
+                            ChatBot
+                        </a>
+                    </div>
+                </nav>
+
+                <div id="chatbot" style={{ height: 388, maxHeight: 388, width: '100%', overflow: 'auto'}}>
                     {this.renderMessages(this.state.messages)}
-                    <div ref={(el) => { this.messagesEnd = el; }} style={{ float: 'left', clear: 'both'}} />
-                    <input type="text" onKeyPress={this._handleInputKeyPress}/>
+                    <div
+                        ref={(el) => { this.messagesEnd = el; }}
+                        style={{ float: 'left', clear: 'both'}}
+                    />
+                </div>
+
+                <div className="col s12">
+                    <input
+                        type="text" onKeyPress={this._handleInputKeyPress}
+                        style={{ margin: 0, paddingLeft: '1%', paddingRight: '1%', width: '98%'}}
+                        placeholder="Type a message"
+                    />
                 </div>
             </div>
         );
-    }    
+    }
 }
 
 export default Chatbot;
