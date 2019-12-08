@@ -5,6 +5,7 @@ import { v4 as uuid } from 'uuid';
 
 import Message from './Message';
 import Card from "./Card";
+import QuickReplies from "./QuickReplies";
 
 const cookies = new Cookies();
 
@@ -97,6 +98,10 @@ class Chatbot extends Component {
         }
     };
 
+    _handleQuickReplyPayload = (text) => {
+        this.df_text_query(text);
+    };
+
     renderMessages = messages => {
         if (messages) {
             return messages.map((message, i) => this.renderOneMessage(message, i));
@@ -132,6 +137,14 @@ class Chatbot extends Component {
                     </div>
                 </div>
             );
+        } else if (message.msg && message.msg.payload && message.msg.payload.fields && message.msg.payload.fields.quick_replies) {
+            return <QuickReplies
+                key={i}
+                text={message.msg.payload.fields.text ? message.msg.payload.fields.text : null}
+                replyClick={this._handleQuickReplyPayload}
+                speaks={message.speaks}
+                payload={message.msg.payload.fields.quick_replies.listValue.values}
+            />;
         }
 
         return null;
