@@ -9,11 +9,11 @@ const sessionClient = new dialogflow.SessionsClient({
     projectID: googleProjectID,
     credentials: { client_email: clientEmail, private_key: privateKey }
 });
-const sessionPath = sessionClient.sessionPath(googleProjectID, sessionID);
 
 module.exports = {
-    textQuery: async function(text, parameters = {}) {
+    textQuery: async function(text, userID, parameters = {}) {
         let self = module.exports;
+        let sessionPath = sessionClient.sessionPath(googleProjectID, sessionID + userID);
 
         const request = {
             session: sessionPath,
@@ -35,8 +35,9 @@ module.exports = {
         return responses;
     },
 
-    eventQuery: async function(event, parameters = {}) {
+    eventQuery: async function(event, userID, parameters = {}) {
         let self = module.exports;
+        let sessionPath = sessionClient.sessionPath(googleProjectID, sessionID + userID);
 
         const request = {
             session: sessionPath,
